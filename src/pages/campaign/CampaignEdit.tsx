@@ -1,7 +1,4 @@
-import {
-  initialCampaignCreate,
-  type CampaignCreate,
-} from "@/types/campaign/create";
+import { type CampaignCreate } from "@/types/campaign/create";
 import {
   Autocomplete,
   FormControlLabel,
@@ -123,6 +120,7 @@ const CampaignEditForm = ({
         control={
           <CheckBox
             value={campaign.isPublic}
+            checked={campaign.isPublic}
             onChange={(e) => dispatch({ isPublic: e.target.checked })}
             disabled={loading || disabled}
           />
