@@ -44,7 +44,6 @@ const UserInput = (props: UserInputProps) => {
       getOptionLabel={(option) => option}
       filterSelectedOptions
       value={props.value}
-      onError={(e) => console.error(e)}
       disabled={props.disabled}
       loading={isLoading}
       onChange={(_, updatedUsers) => props.onChange(updatedUsers)}
