@@ -4,52 +4,56 @@ import sessionContext from "../contexts/SessionContext";
 import { Navigate } from "react-router-dom";
 import { fetchAPIFromBackendSingleWithErrorHandling } from "@/api";
 const SessionLoading = () => {
-    return <div>Loading who are you...</div>;
-}
+  return <div>Loading who are you...</div>;
+};
 const SessionError = ({ error }: { error: Error }) => {
-    return <div>Error loading session: {error.message}</div>;
-}
+  return <div>Error loading session: {error.message}</div>;
+};
 const SessionProvider = ({ children }: { children: React.ReactNode }) => {
-    const [sessionLoading, setSessionLoading] = useState(true);
-    const [session, setSession] = useState<Session | null>(null);
-    const [sessionError, setSessionError] = useState<Error | null>(null);
-    useEffect(() => {
-        const fetchSession = async () => {
-            setSessionLoading(true);
-            setSessionError(null);
-            try {
-                const response = await fetchAPIFromBackendSingleWithErrorHandling<Session>('/user/me');
-                if ('detail' in response) {
-                    throw new Error(response.detail);
-                }
-                setSession(response.data);
-            } catch (error) {
-                setSession(null);
-                console.error("Failed to fetch session:", error);
-                setSessionError(error as Error);
-            } finally {
-                setSessionLoading(false);
-            }
-        };
-        fetchSession();
-    }, []);
-    if (!session && !sessionLoading) {
-        let path = encodeURIComponent(window.location.pathname + window.location.search);
-        if (window.location.pathname.startsWith('/user/login')) {
-            path = '/';
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [sessionError, setSessionError] = useState<Error | null>(null);
+  useEffect(() => {
+    const fetchSession = async () => {
+      setSessionLoading(true);
+      setSessionError(null);
+      try {
+        const response =
+          await fetchAPIFromBackendSingleWithErrorHandling<Session>("/user/me");
+        if ("detail" in response) {
+          throw new Error(response.detail);
         }
-        return <Navigate to={`/user/login?next=${path}`} replace />;
+        setSession(response.data);
+      } catch (error) {
+        setSession(null);
+        console.error("Failed to fetch session:", error);
+        setSessionError(error as Error);
+      } finally {
+        setSessionLoading(false);
+      }
+    };
+    fetchSession();
+  }, []);
+  if (sessionError) {
+    return <SessionError error={sessionError} />;
+  }
+  if (!session && !sessionLoading) {
+    let path = encodeURIComponent(
+      window.location.pathname + window.location.search,
+    );
+    if (window.location.pathname.startsWith("/user/login")) {
+      path = "/";
     }
-    if (sessionLoading) {
-        return <SessionLoading />;
-    }
-    if (sessionError) {
-        return <SessionError error={sessionError} />;
-    }
-    return (
-        <sessionContext.Provider value={session}>
-            {children}
-        </sessionContext.Provider>
-    )
-}
+    return <Navigate to={`/user/login?next=${path}`} replace />;
+  }
+  if (sessionLoading) {
+    return <SessionLoading />;
+  }
+
+  return (
+    <sessionContext.Provider value={session}>
+      {children}
+    </sessionContext.Provider>
+  );
+};
 export default SessionProvider;
