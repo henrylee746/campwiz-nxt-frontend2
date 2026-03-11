@@ -21,7 +21,10 @@ const SessionProvider = ({ children }: { children: React.ReactNode }) => {
         const response =
           await fetchAPIFromBackendSingleWithErrorHandling<Session>("/user/me");
         if ("detail" in response) {
-          throw new Error(response.detail);
+          if (response.status !== 401) {
+            throw new Error(response.detail);
+          }
+          return;
         }
         setSession(response.data);
       } catch (error) {

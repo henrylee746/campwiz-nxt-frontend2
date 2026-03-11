@@ -19,16 +19,9 @@ export async function fetchAPIFromBackendSingleWithErrorHandling<T>(path: string
         const res = await fetchFromBackend(`${API_PATH}${path}`, req)
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(`HTTP error! status: ${res.status}, message: ${errorText}`);
+            return { detail: errorText, status: res.status };
         }
-        const r = await res.json();
-        if (res.ok) {
-            return r
-        } else {
-            return {
-                detail: r.detail
-            }
-        }
+        return await res.json();
     } catch (e) {
         return {
             detail: (e as Error).message
