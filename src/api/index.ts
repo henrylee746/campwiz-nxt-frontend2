@@ -19,7 +19,12 @@ export async function fetchAPIFromBackendSingleWithErrorHandling<T>(path: string
         const res = await fetchFromBackend(`${API_PATH}${path}`, req)
         if (!res.ok) {
             const errorText = await res.text();
-            return { detail: errorText, status: res.status };
+            try {
+                const errorJson = JSON.parse(errorText);
+                return { detail: errorJson.detail ?? errorText, status: res.status };
+            } catch {
+                return { detail: errorText, status: res.status };
+            }
         }
         return await res.json();
     } catch (e) {
