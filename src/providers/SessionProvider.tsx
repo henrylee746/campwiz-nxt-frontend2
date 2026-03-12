@@ -21,12 +21,33 @@ const SessionProvider = ({ children }: { children: React.ReactNode }) => {
         const response =
           await fetchAPIFromBackendSingleWithErrorHandling<Session>("/user/me");
         if ("detail" in response) {
+          // 401 is expected when the user is not authenticated
+          //So we just keep the session as null
           if (response.status !== 401) {
             throw new Error(response.detail);
           }
           return;
         }
-        setSession(response.data);
+        const apiData = response.data;
+        const hydratedSession: Session = {
+          ...apiData,
+          hasPermission: (permission: string) =>
+            Boolean(apiData.permissionMap[permission]),
+          logout: async () => {
+            const res = await fetchAPIFromBackendSingleWithErrorHandling<{
+              redirect: string;
+            }>("/user/logout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              redirect: "manual",
+            });
+            setSession(null);
+            if (!("detail" in res) && res.data.redirect) {
+              window.location.href = res.data.redirect;
+            }
+          },
+        };
+        setSession(hydratedSession);
       } catch (error) {
         setSession(null);
         console.error("Failed to fetch session:", error);

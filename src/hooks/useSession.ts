@@ -1,3 +1,4 @@
+//Custom context hook for the session
 import { useContext } from "react";
 import sessionContext from "../contexts/SessionContext";
 import type { Session } from "../types/session";
